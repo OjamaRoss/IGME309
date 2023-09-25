@@ -9,8 +9,16 @@ void Application::InitVariables(void)
 	m_pCameraMngr->SetPositionTargetAndUpward(v3Position, v3Target, v3Upward);
 
 	//Allocate the memory for the Meshes
-	m_pMesh = new MyMesh();
-	m_pMesh->GenerateCube(1.0f, C_BLACK);
+
+	m_uMeshCount = 46;
+
+	for (int i = 0; i < m_uMeshCount; i++) {
+
+		MyMesh* newMesh = new MyMesh();
+		meshHolder.push_back(newMesh);
+		meshHolder[i]->GenerateCube(1.0f, C_BLACK);
+
+	}
 		
 }
 void Application::Update(void)
@@ -39,7 +47,76 @@ void Application::Display(void)
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 
-	m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_qArcBall));
+	static float timer = 0;
+	static int clock = m_pSystem->GenClock(); 
+	timer += static_cast<float>(m_pSystem->GetDeltaTime(clock));
+
+	matrix4 moving = glm::translate(vector3(timer,0.0f,0.0f));
+	//matrix4 moving = glm::translate(vector3(0.0f, 0.0f, 0.0f));
+
+	int count = 0;
+
+	//1
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-3.0f, 3.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(3.0f, 3.0f, -10.0f))); count++;
+
+	//2
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-2.0f, 2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(2.0f, 2.0f, -10.0f))); count++;
+
+	//3
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-3.0f, 1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-2.0f, 1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-1.0f, 1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(0.0f, 1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(1.0f, 1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(2.0f, 1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(3.0f, 1.0f, -10.0f))); count++;
+
+	//4
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-4.0f, 0.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-3.0f, 0.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-1.0f, 0.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(0.0f, 0.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(1.0f, 0.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(3.0f, 0.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(4.0f, 0.0f, -10.0f))); count++;
+
+	//5
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-5.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-4.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-3.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-2.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-1.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(0.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(1.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(2.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(3.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(4.0f, -1.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(5.0f, -1.0f, -10.0f))); count++;
+
+	//6
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-5.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-3.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-2.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-1.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(0.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(1.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(2.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(3.0f, -2.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(5.0f, -2.0f, -10.0f))); count++;
+
+	//7
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-5.0f, -3.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-2.0f, -3.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(2.0f, -3.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(5.0f, -3.0f, -10.0f))); count++;
+
+	//8
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-2.0f, -4.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(-1.0f, -4.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(1.0f, -4.0f, -10.0f))); count++;
+	meshHolder[count]->Render(m4Projection, m4View, glm::translate(moving, vector3(2.0f, -4.0f, -10.0f))); count++;
 
 	// draw a skybox
 	m_pModelMngr->AddSkyboxToRenderList();
@@ -59,7 +136,19 @@ void Application::Display(void)
 void Application::Release(void)
 {
 	//Release meshes
-	SafeDelete(m_pMesh);
+
+	std::vector<MyMesh*> meshHolder;
+
+	for (int i = 0; i < meshHolder.size(); i++) {
+
+		if (meshHolder[i] != nullptr) {
+
+			delete meshHolder[i];
+			meshHolder[i] = nullptr;
+	
+		}
+	
+	}
 
 	//release GUI
 	ShutdownGUI();

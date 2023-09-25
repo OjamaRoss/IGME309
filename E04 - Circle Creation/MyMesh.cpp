@@ -12,13 +12,39 @@ void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	if (a_nSubdivisions > 360)
 		a_nSubdivisions = 360;
 
-	/*
-		Calculate a_nSubdivisions number of points around a center point in a radial manner
-		then call the AddTri function to generate a_nSubdivision number of faces
-	*/
-	AddTri(	vector3(0.0f, 0.0f, 0.0f),
-			vector3(1.0f, 0.0f, 0.0f),
-			vector3(0.77f, 0.77f, 0.0f));
+	//using radians, divide 360 by the number of subdivisions we're going to use to move around the whole way evenly
+	float spacing = (2 * std::_Pi) / a_nSubdivisions;
+	std::vector<vector3> vecHold;
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		//determining an x and y for the line while leaving z as 0 since we're making a 2D shape
+		vector3 input = vector3(cos(spacing * i) * a_fRadius, sin(spacing * i) * a_fRadius, 0.0f);
+		//store for later
+		vecHold.push_back(input);
+
+	}
+	
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		int nextVec;
+		if ((i + 1) == a_nSubdivisions) {
+
+			nextVec = 0;
+
+		}
+		else {
+
+			nextVec = i + 1;
+
+		}
+		//about the origin(pass in a zero vector), and to either the next point or back to the original vector at the end
+		AddTri(vector3(0.0f, 0.0f, 0.0f), 
+			vecHold[i], 
+			vecHold[(nextVec)]);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
