@@ -46,6 +46,11 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 }
 void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
+
+	//A
+	//b c (x1 x2)
+	// d
+	
 	if (a_fRadius < 0.01f)
 		a_fRadius = 0.01f;
 
@@ -60,10 +65,52 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//vector3 pointTopCenter(-fValue, -fValue, fValue)
 
+	//vector3 pointBottomCenter(-fValue, -fValue, fValue)
+
+	//same as building a circle, except center one around the origin 'center' point, and the other around the peak point.
+
+	float spacing = (2 * std::_Pi) / a_nSubdivisions;
+
+	std::vector<vector3> vecHold;
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing * i) * a_fRadius, sin(spacing * i) * a_fRadius, 0.0f);
+		vecHold.push_back(input);
+
+	}
+	
+	//get the b and c to center around a and d
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		int nextVec;
+		if ((i + 1) == a_nSubdivisions) {
+
+			nextVec = 0;
+
+		}
+		else {
+
+			nextVec = i + 1;
+
+		}
+		
+		//build around b, c, d
+
+		AddTri(vector3(0.0f, 0.0f, 0.0f),
+			vecHold[i],
+			vecHold[(nextVec)]);
+		
+		//build with same b and c, but at a rather than d
+		AddTri(vecHold[i],
+			vector3(0.0f, 0.0f, a_fHeight),
+			vecHold[(nextVec)]);
+
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -84,9 +131,57 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//two circles
+	float spacing = (2 * std::_Pi) / a_nSubdivisions;
+
+	//Get the cordinates around
+	std::vector<vector3> vecHold;
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing * i) * a_fRadius, sin(spacing * i) * a_fRadius, 0.0f);
+		vecHold.push_back(input);
+
+	}
+
+	//use the points of the circle, construct 4 triangles per segment
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		int nextVec;
+		if ((i + 1) == a_nSubdivisions) {
+
+			nextVec = 0;
+
+		}
+		else {
+
+			nextVec = i + 1;
+
+		}
+
+		//top circle
+		AddTri(vector3(0.0f, 0.0f, a_fHeight),
+			vecHold[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHold[(nextVec)] + vector3(0.0f, 0.0f, a_fHeight));
+
+		//connect one point of top to two of the bottom
+		AddTri(vecHold[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHold[i],
+			vecHold[(nextVec)]);
+
+		//connect two points of the top to one of the bottom
+		AddTri(vecHold[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHold[(nextVec)],
+			vecHold[(nextVec)] + vector3(0.0f, 0.0f, a_fHeight));
+
+		//bottom circle
+		AddTri(vecHold[i],
+			vector3(0.0f, 0.0f, 0.0f),
+			vecHold[(nextVec)]);
+
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -114,9 +209,80 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	float spacing = (2 * std::_Pi) / a_nSubdivisions;
+
+	//Get the cordinates around the innermost section
+	std::vector<vector3> vecHoldInner;
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing * i) * a_fInnerRadius, sin(spacing * i) * a_fInnerRadius, 0.0f);
+		vecHoldInner.push_back(input);
+
+	}
+
+	std::vector<vector3> vecHoldOuter;
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing * i) * a_fOuterRadius, sin(spacing * i) * a_fOuterRadius, 0.0f);
+		vecHoldOuter.push_back(input);
+
+	}
+
+	//use the points of the circles, construct 8 triangles per segment
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		int nextVec;
+		if ((i + 1) == a_nSubdivisions) {
+
+			nextVec = 0;
+
+		}
+		else {
+
+			nextVec = i + 1;
+
+		}
+		//vecHoldOuter
+		//vecHoldInner
+
+		//top Triangles
+		AddTri(vecHoldInner[nextVec] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldInner[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldOuter[i] + vector3(0.0f, 0.0f, a_fHeight));
+		AddTri(vecHoldInner[nextVec] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldOuter[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldOuter[nextVec] + vector3(0.0f, 0.0f, a_fHeight));
+
+		//bottom triangles
+		AddTri(vecHoldInner[i],
+			vecHoldInner[nextVec],
+			vecHoldOuter[i]);
+		AddTri(vecHoldOuter[i],
+			vecHoldInner[nextVec],
+			vecHoldOuter[nextVec]);
+
+		//inner side triangles
+		AddTri(vecHoldInner[i],
+			vecHoldInner[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldInner[(nextVec)]);
+		AddTri(vecHoldInner[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldInner[nextVec] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldInner[(nextVec)]);
+
+		//outer side triangles
+		AddTri(vecHoldOuter[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldOuter[i],
+			vecHoldOuter[(nextVec)]);
+		AddTri(vecHoldOuter[nextVec] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldOuter[i] + vector3(0.0f, 0.0f, a_fHeight),
+			vecHoldOuter[(nextVec)]);
+
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -146,9 +312,59 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	float spacing = (2 * std::_Pi) / a_nSubdivisionsA;
+	float spacing2 = (2 * std::_Pi) / a_nSubdivisionsB;
+
+	//Get the cordinates around the innermost section
+	std::vector<vector3> vecHoldInner;
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing * i) * a_fInnerRadius, sin(spacing * i) * a_fInnerRadius, 0.0f);
+		vecHoldInner.push_back(input);
+
+	}
+
+	std::vector<vector3> vecHoldOuter;
+	for (int i = 0; i < a_nSubdivisionsB; i++)
+	{
+		//glm::mat4 outerMat = glm::mat4(vecHolderInner[i],)
+
+		//glm::rotate()
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing2 * i) * (a_fInnerRadius - a_fOuterRadius), sin(spacing2 * i) * (a_fInnerRadius - a_fOuterRadius), tan(spacing2 * i) * (a_fInnerRadius - a_fOuterRadius));
+		vecHoldOuter.push_back(input);
+
+	}
+
+	//use the points of the circles, construct 8 triangles per segment
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+
+		int nextVec;
+		if ((i + 1) == a_nSubdivisionsB) {
+
+			nextVec = 0;
+
+		}
+		else {
+
+			nextVec = i + 1;
+
+		}
+		//vecHoldOuter
+		//vecHoldInner
+
+		//top Triangles
+		AddTri(vecHoldOuter[i] + vecHoldInner[i],
+			vecHoldOuter[nextVec] + vecHoldInner[i],
+			vecHoldOuter[i] - vecHoldInner[i]);
+		AddTri(vecHoldOuter[nextVec] - vecHoldInner[i],
+			vecHoldOuter[i] + vecHoldInner[i],
+			vecHoldOuter[nextVec] - vecHoldInner[i]);
+
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -171,9 +387,107 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//top point: (0.0f, 0.0f, a_fRadius);
+	//bottom point: (0.0f, 0.0f, -a_fRadius);
+
+	//two circles
+	float spacing = (2 * std::_Pi) / a_nSubdivisions;
+
+	//Get the cordinates around
+	std::vector<vector3> vecHold;
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		//the triangles themselves are still 2d shapes with a 0.0f in Z
+		vector3 input = vector3(cos(spacing * i) * a_fRadius, sin(spacing * i) * a_fRadius, 0.0f);
+		vecHold.push_back(input);
+
+	}
+
+	//use the points of the circle, construct 4 triangles per segment
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+
+		int nextVec;
+		if ((i + 1) == a_nSubdivisions) {
+
+			nextVec = 0;
+
+		}
+		else {
+
+			nextVec = i + 1;
+
+		}
+
+		float topZ = 2 * a_fRadius;
+
+		// center connection
+		vector3 vecTemp = vecHold[i];
+		vector3 nextTemp = vecHold[nextVec];
+
+		vecTemp *= 1.0f / a_nSubdivisions;
+		nextTemp *= 1.0f / a_nSubdivisions;
+
+	
+
+		AddTri(vector3(0.0f, 0.0f, topZ),
+			vecTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * 1)),
+			nextTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * 1)));
+
+		vector3 lastVecTemp = vecTemp;
+		vector3 lastVecNext = nextTemp;
+
+		//middle pannels
+		for (float k = 1.0f; k < a_nSubdivisions - 1; k++) {
+
+			vecTemp = vecHold[i];
+			nextTemp = vecHold[nextVec];
+
+			if (k < a_nSubdivisions / 2) {
+
+				vecTemp *= (k + 1) / a_nSubdivisions;
+				nextTemp *= (k + 1) / a_nSubdivisions;
+
+			}
+			else if (k == a_nSubdivisions) {
+
+
+				vecTemp = lastVecTemp;
+				nextTemp= lastVecNext;
+
+			}
+			else {
+
+				vecTemp *= (a_nSubdivisions - k) / a_nSubdivisions;
+				nextTemp *= (a_nSubdivisions - k) / a_nSubdivisions;
+
+			}
+			
+
+
+			AddTri(lastVecTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * k)),
+				nextTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * (k + 1))),
+				lastVecNext + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * k)));
+			AddTri(lastVecTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * k)),
+				vecTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * (k + 1))),
+				nextTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * (k + 1))));
+
+			lastVecTemp = vecTemp;
+			lastVecNext = nextTemp;
+
+		}
+
+		//bottom connection
+
+		AddTri(lastVecTemp + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * (a_nSubdivisions - 1))),
+			vector3(0.0f, 0.0f, 0.0f),
+			lastVecNext + vector3(0.0f, 0.0f, topZ - ((topZ / a_nSubdivisions) * (a_nSubdivisions - 1))));
+		
+
+	}
+
+
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
