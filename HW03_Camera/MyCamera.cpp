@@ -21,16 +21,48 @@ void MyCamera::MoveForward(float a_fDistance)
 	//		 in the _Binary folder you will notice that we are moving 
 	//		 backwards and we never get closer to the plane as we should 
 	//		 because as we are looking directly at it.
-	m_v3Position += vector3(0.0f, 0.0f, a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, a_fDistance);
+	
+	//wrong solution stuff I tried that I'm keeping for my own later reference. Please ignore.
+	//SetPositionTargetAndUpward(m_v3Position + vector3(0.0f, 0.0f, a_fDistance), m_v3Target + vector3(0.0f, 0.0f, a_fDistance), m_v3Upward);
+	//m_v3Forward = vector3(0.0f,0.0f,-1.0f);
+	//m_v3Position += glm::rotate(m_qOrientation, vector3(0.0f, 0.0f, a_fDistance));
+	//m_v3Target = glm::rotate(m_qOrientation, m_v3Target);
+
+	//The direction vectors are normalized, meaning you can simply move target and position in said direction,
+	//multiplying by the distance to create the 'speed'
+
+	m_v3Position += (GetForward() * a_fDistance);
+
+	m_v3Target += (GetForward() * a_fDistance);
+
+	CalculateView();
+	
+	
 }
 void MyCamera::MoveVertical(float a_fDistance)
 {
-	//Tip:: Look at MoveForward
+	//The direction vectors are normalized, meaning you can simply move target and position in said direction,
+	//multiplying by the distance to create the 'speed'
+
+	m_v3Position += GetUpward() * a_fDistance;
+
+	m_v3Target += GetUpward() * a_fDistance;
+
+	CalculateView();
+
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
-	//Tip:: Look at MoveForward
+
+	//The direction vectors are normalized, meaning you can simply move target and position in said direction,
+	//multiplying by the distance to create the 'speed'
+
+	m_v3Position += GetRightward() * a_fDistance;
+
+	m_v3Target += GetRightward() * a_fDistance;
+	
+	CalculateView();
+
 }
 void MyCamera::CalculateView(void)
 {
@@ -40,7 +72,52 @@ void MyCamera::CalculateView(void)
 	//		 it will receive information from the main code on how much these orientations
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
+
+	//Set up the quat. Vector indicates sensitivity. 
+	m_qOrientation = m_qOrientation * glm::angleAxis(glm::radians(m_v3PitchYawRoll.y), vector3(0.0f, -8.0f, 0.0f));
+	m_qOrientation = m_qOrientation * glm::angleAxis(glm::radians(m_v3PitchYawRoll.x), vector3(-8.0f, 0.0f, 0.0f));
+	m_qOrientation = m_qOrientation * glm::angleAxis(glm::radians(m_v3PitchYawRoll.z), vector3(0.0f, 0.0f, 8.0f));
+	
+	//wrong solution stuff I tried that I'm keeping for my own later reference. Please ignore.
+	/*vector3 tempTar = m_v3Target;
+	vector3 tempTarRot = glm::rotate(m_qOrientation, tempTar);*/
+	/*vector3 tempPos = m_v3Position;
+	vector3 tempPosRot = glm::rotate(m_qOrientation, tempPos);*/
+	/*vector3 tempUp = m_v3Upward - tempPos;
+	vector3 tempUpRot = glm::rotate(m_qOrientation, tempUp);*/
+	//m_m4View = glm::lookAt(m_v3Position, tempTarRot * m_qOrientation, m_qOrientation * vector3(0.0f,0.0f,1.0f));
+	//glm::mat4 invert = glm::inverse(m_m4View);
+	//SetUpward(glm::normalize(glm::vec3(invert[1]) * m_qOrientation));
+	//SetForward(glm::normalize(glm::vec3(invert[2]) * m_qOrientation));
+	//SetRightward(glm::normalize(glm::vec3(invert[0]) * m_qOrientation));
+	//SetForward(glm::normalize(GetForward()));
+
+	//Don't want to pass the real variables in some cases or it causes a loop
+	vector3 tempUp = m_v3Upward;
+	vector3 tempPos = m_v3Position;
+	vector3 tempTar = m_v3Target;
+
+	//Calculate the forward vector and multiply it my the quats to be able to use the mouse rotation. 
+	//Must be done here to not cause issues.
+	vector3 forwardVec = glm::normalize(m_v3Target - m_v3Position) * m_qOrientation;
+
+	//Using the forward Vec we can calculate the right and up vectors
+	vector3 rightVec = glm::normalize(glm::cross(forwardVec, vector3(0.0f, 1.0f, 0.0f)));
+	vector3 upVec = glm::normalize(glm::cross(rightVec, forwardVec));
+
+	//Set the vectors to our proper values
+	SetForward(forwardVec);
+	SetUpward(upVec);
+	SetRightward(rightVec);
+
+	//The target needs to adapt with the position, as such we're using the target to calculate the forward vec
+	//and here just adding pos and forward together to create a forward always a set distance from the camera. 
+	m_m4View = glm::lookAt(m_v3Position, m_v3Position + GetForward(), upVec);
+
+	//This value needs to be reset or the camera just spirals
+	m_v3PitchYawRoll = vector3(0.0f);
+	
+	
 }
 //You can assume that the code below does not need changes unless you expand the functionality
 //of the class or create helper methods, etc.

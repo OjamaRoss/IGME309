@@ -15,6 +15,7 @@ namespace BTX
 class MyCamera : BTXs::Camera
 {
 	typedef BTXs::Camera super;
+	quaternion m_qOrientation;
 	////Copy of the variables in BTXs::Camera from which this in inheriting, just as a reminder
 	////of what they are, if I redefine them here that is called shadowing and if you shadow you 
 	////will have a bad time
