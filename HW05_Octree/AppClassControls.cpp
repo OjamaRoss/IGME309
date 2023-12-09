@@ -70,6 +70,7 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 			++m_uOctantLevels;
 			SafeDelete(m_pRoot);
 			m_pRoot = new Octant(m_uOctantLevels, 5);
+			std::cout << m_pRoot->GetOctantCount() << std::endl;
 		}
 		break;
 	case sf::Keyboard::F5:

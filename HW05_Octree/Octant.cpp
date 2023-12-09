@@ -1,4 +1,5 @@
 #include "Octant.h"
+
 using namespace BTX;
 //  Octant
 uint Octant::m_uOctantCount = 0;
@@ -23,20 +24,45 @@ Octant::Octant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	//to subdivide the octant based on how many objects are in it already an how many you IDEALLY
 	//want in it, remember each subdivision will create 8 children for this octant but not all children
 	//of those children will have children of their own
-
 	//The following is a made-up size, you need to make sure it is measuring all the object boxes in the world
 	std::vector<vector3> lMinMax;
-	lMinMax.push_back(vector3(-50.0f));
-	lMinMax.push_back(vector3(25.0f));
-	RigidBody pRigidBody = RigidBody(lMinMax);
+	
+	
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++) {
+
+		Entity* curEntity = m_pEntityMngr->GetEntity(i);
+		RigidBody* curRB = curEntity->GetRigidBody();
+
+		lMinMax.push_back(curRB->GetMinGlobal());
+		lMinMax.push_back(curRB->GetMaxGlobal());
+		
+
+	}
+
+	RigidBody* pRigidBody = new RigidBody(lMinMax);
+
+	vector3 halfW = pRigidBody->GetHalfWidth();
+
+	float maxXYZ = 0.0;
+
+	for (int i = 0; i < 3; i++) {
+
+		if (maxXYZ < halfW[i]) {
 
 
-	//The following will set up the values of the octant, make sure the are right, the rigid body at start
-	//is NOT fine, it has made-up values
-	m_fSize = pRigidBody.GetHalfWidth().x * 2.0f;
-	m_v3Center = pRigidBody.GetCenterLocal();
-	m_v3Min = m_v3Center - pRigidBody.GetHalfWidth();
-	m_v3Max = m_v3Center + pRigidBody.GetHalfWidth();
+			maxXYZ = halfW[i];
+
+		}
+
+	}
+
+	m_fSize = maxXYZ * 2.0f;
+	m_v3Center = pRigidBody->GetCenterLocal();
+	m_v3Min = m_v3Center - vector3(maxXYZ);
+	m_v3Max = m_v3Center + vector3(maxXYZ);
+
+	lMinMax.clear();
+	SafeDelete(pRigidBody);
 
 	m_uOctantCount++; //When we add an octant we increment the count
 	ConstructTree(m_uMaxLevel); //Construct the children
@@ -48,16 +74,82 @@ bool Octant::IsColliding(uint a_uRBIndex)
 	//If the index given is larger than the number of elements in the bounding object there is no collision
 	//As the Octree will never rotate or scale this collision is as easy as an Axis Alligned Bounding Box
 	//Get all vectors in global space (the octant ones are already in Global)
+
+	if (a_uRBIndex >= m_pEntityMngr->GetEntityCount()) {
+
+		return false;
+
+	}
+
+	Entity* curEnt = m_pEntityMngr->GetEntity(a_uRBIndex);
+	RigidBody* curRig = curEnt->GetRigidBody();
+
+	vector3 minV = curRig->GetMinGlobal();
+	vector3 maxV = curRig->GetMaxGlobal();
+
+	if (m_v3Min.x > maxV.x) {
+
+		return false;
+
+	}
+	if (m_v3Max.x < minV.x) {
+
+		return false;
+
+	}
+
+	if (m_v3Min.y > maxV.y) {
+
+		return false;
+
+	}
+	if (m_v3Max.y < minV.y) {
+
+		return false;
+
+	}
+
+	if (m_v3Min.z > maxV.z) {
+
+		return false;
+
+	}
+	if (m_v3Max.z < minV.z) {
+
+		return false;
+
+	}
+
 	return true; // for the sake of startup code
 }
 void Octant::Display(uint a_nIndex, vector3 a_v3Color)
 {
 	// Display the specified octant
+	if (m_uID == a_nIndex) {
+
+		m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) * glm::scale(vector3(m_fSize)), a_v3Color);
+		return;
+	}
+
+	for (int i = 0; i < m_uChildren; i++) {
+
+		m_pChild[i]->Display(a_nIndex);
+
+	}
+
+
 }
 void Octant::Display(vector3 a_v3Color)
 {
 	//this is meant to be a recursive method, in starter code will only display the root
 	//even if other objects are created
+
+	for (int i = 0; i < m_uChildren; i++) {
+
+		m_pChild[i]->Display(a_v3Color);
+
+	}
+
 	m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
 		glm::scale(vector3(m_fSize)), a_v3Color);
 }
@@ -72,10 +164,78 @@ void Octant::Subdivide(void)
 		return;
 
 	//Subdivide the space and allocate 8 children
+	m_uChildren = 8;
+
+	float size = m_fSize / 4.0;
+
+	vector3 currCenter = m_v3Center;
+
+	//bottom left back
+	currCenter.x = currCenter.x - size;
+	currCenter.y = currCenter.y - size;
+	currCenter.z = currCenter.z - size;
+	m_pChild[0] = new Octant(currCenter, size * 2.0);
+
+	//bottom right back
+	currCenter.x = currCenter.x + (size * 2);
+	m_pChild[1] = new Octant(currCenter, size * 2.0);
+
+	//bottom right front
+	currCenter.z = currCenter.z + (size * 2);
+	m_pChild[2] = new Octant(currCenter, size * 2.0);
+
+	//bottom left front
+	currCenter.x = currCenter.x - (size * 2);
+	m_pChild[3] = new Octant(currCenter, size * 2.0);
+
+	//top Left Front
+	currCenter.y = currCenter.y + (size * 2);
+	m_pChild[4] = new Octant(currCenter, size * 2.0);
+
+	//top Left Back
+	currCenter.z = currCenter.z - (size * 2);
+	m_pChild[5] = new Octant(currCenter, size * 2.0);
+
+	//top Right Back
+	currCenter.x = currCenter.x + (size * 2);
+	m_pChild[6] = new Octant(currCenter, size * 2.0);
+
+	//top Right Front
+	currCenter.z = currCenter.z + (size * 2);
+	m_pChild[7] = new Octant(currCenter, size * 2.0);
+
+	for (int i = 0; i < 8; i++) {
+
+		m_pChild[i]->m_pRoot = m_pRoot;
+		m_pChild[i]->m_pParent = this;
+		m_pChild[i]->m_uLevel = m_uLevel + 1;
+		if (m_pChild[i]->ContainsAtLeast(m_uIdealEntityCount)) {
+
+			m_pChild[i]->Subdivide();
+
+		}
+	}
+
 }
 bool Octant::ContainsAtLeast(uint a_nEntities)
 {
 	//You need to check how many entity objects live within this octant
+
+	uint count = 0;
+	for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++) {
+
+		if (IsColliding(i)) {
+
+			count++;
+
+		}
+		if (count > a_nEntities) {
+
+			return true;
+
+		}
+
+	}
 	return false; //return something for the sake of start up code
 }
 void Octant::AssignIDtoEntity(void)
@@ -83,7 +243,25 @@ void Octant::AssignIDtoEntity(void)
 	//Recursive method
 	//Have to traverse the tree and make sure to tell the entity manager
 	//what octant (space) each object is at
-	m_pEntityMngr->AddDimension(0, m_uID);//example only, take the first entity and tell it its on this space
+	for (int i = 0; i < m_uChildren; i++) {
+
+		m_pChild[i]->AssignIDtoEntity();
+
+	}
+	if (m_uChildren == 0) {
+
+		for (int i = 0; i < m_pEntityMngr->GetEntityCount(); i++) {
+
+			if (IsColliding(i)) {
+
+				m_EntityList.push_back(i);
+				m_pEntityMngr->AddDimension(i, m_uID);
+
+			}
+		}
+
+	}
+
 }
 //-------------------------------------------------------------------------------------------------------------------
 // You can assume the following is fine and does not need changes, you may add onto it but the code is fine as is

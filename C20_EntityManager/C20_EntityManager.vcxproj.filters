@@ -42,10 +42,10 @@
     <ClCompile Include="AppClassGUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MyEntity.cpp">
+    <ClCompile Include="MyEntityManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MyEntityManager.cpp">
+    <ClCompile Include="MyEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
